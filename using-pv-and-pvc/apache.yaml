@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deployment
+  labels:
+    app: apache
+spec:
+  selector:
+    matchLabels:
+      app: test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - name: test
+        image: ubuntu:20.04
+        command: ["/bin/sh", "-c", "apt update -y && apt install -y apache2 && service apache2 start && tail -f /dev/null"]
+        ports:
+        - name: http
+          containerPort: 80
+        env:
+        - name: DEBIAN_FRONTEND
+          value: noninteractive
+        volumeMounts:  # Add this section
+        - name: apache-data
+          mountPath: /var/www/html   # Adjust the mountPath as needed
+      volumes:  # Add this section
+      - name: apache-data
+        persistentVolumeClaim:
+          claimName: apache-pvc  # Reference the PVC defined in pv-pvc.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apache-service
+spec:
+  selector:
+    app: test
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: http

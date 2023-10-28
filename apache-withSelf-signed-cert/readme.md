@@ -1,0 +1,127 @@
+To modify the manifest to work with the `pv-pvc.yaml` for data persistence and integrate with a self-signed certificate, you can use the following updated manifest:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: my-selfsigned-secret
+type: kubernetes.io/tls
+data:
+  tls.crt: <Base64-encoded certificate>  # Replace with your self-signed certificate
+  tls.key: <Base64-encoded private key>  # Replace with your private key
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: test-deployment
+  labels:
+    app: apache
+spec:
+  selector:
+    matchLabels:
+      app: test
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - name: test
+        image: ubuntu:20.04
+        command: ["/bin/sh", "-c", "apt update -y && apt install -y apache2 && service apache2 start && tail -f /dev/null"]
+        ports:
+        - name: http
+          containerPort: 80
+        env:
+        - name: DEBIAN_FRONTEND
+          value: noninteractive
+        volumeMounts:
+        - name: tls-secret
+          mountPath: /etc/apache2/ssl
+        - name: data-volume  # Specify the name of the volume
+          mountPath: /var/www/html  # Mount path for your web data
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: apache-service
+spec:
+  selector:
+    app: test
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: http
+  - name: https
+    protocol: TCP
+    port: 443
+    targetPort: https
+  type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: apache-ingress
+spec:
+  tls:
+  - hosts:
+    - example.com  # Replace with your domain
+    secretName: my-selfsigned-secret  # Reference the Secret created above
+  rules:
+  - host: example.com  # Replace with your domain
+    http:
+      paths:
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: apache-service
+            port:
+              number: 80
+      - pathType: Prefix
+        path: /
+        backend:
+          service:
+            name: apache-service
+            port:
+              number: 443
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: data-volume-claim  # PVC name
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi  # Request storage size
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: data-pv  # PV name
+spec:
+  capacity:
+    storage: 1Gi  # Storage size
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /mnt/data  # Local host path for data storage
+  persistentVolumeReclaimPolicy: Retain
+---
+```
+
+In this updated manifest:
+
+- A `PersistentVolumeClaim` (`data-volume-claim`) and a `PersistentVolume` (`data-pv`) are defined for data persistence using the `pv-pvc.yaml` naming convention. \
+You should make sure the `storage` size and `hostPath` are appropriate for your use case.
+
+- The `data-volume` volume is mounted in the `test-deployment` container to `/var/www/html`, which can be used for storing website data.
+
+- The self-signed certificate (`my-selfsigned-secret`) is still used for HTTPS in the Ingress resource.
+
+Make sure to replace placeholders like `<Base64-encoded certificate>`, `<Base64-encoded private key>`, `example.com`, `data-volume-claim`, and `data-pv` with your actual values and naming conventions. \
+Additionally, ensure that the paths and settings align with your specific requirements for data storage and HTTPS configuration.
