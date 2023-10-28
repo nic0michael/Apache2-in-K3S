@@ -1,7 +1,7 @@
 ## Running Apache2 in the Kubernetes Cluster
 
 ### 1. Create the Kubernetes manifest
-Runn this command:
+Run this command:
 ```
 nano apache.yaml
 ```
