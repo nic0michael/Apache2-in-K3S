@@ -13,5 +13,5 @@ This is required to have a permanent storage of the Web Server Content
 [Instruction to do this](https://github.com/nic0michael/Apache2-in-K3S/tree/master/using-pv-and-pvc)
 
 ## 3. Enableing HTTPS
-We will now create a Self-signed certificate and add this to the project \
+We will now **create a Self-signed certificate** and add this to the project \
 [Instruction to do this](https://github.com/nic0michael/Apache2-in-K3S/tree/master/apache-withSelf-signed-cert)
