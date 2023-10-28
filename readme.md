@@ -1,6 +1,6 @@
 
 # Deploying Apache2 Web-server in the kubernetes Cluster
-After noticing that this sublect is not treated well in YouTube we decided to do a proper job there.\
+After noticing that this sublect is not treated well in YouTube we decided to do a proper job.\
 Here is our Source Code:
 
 ## 1. Get the basic Apache project working in your kubernetes Cluster
