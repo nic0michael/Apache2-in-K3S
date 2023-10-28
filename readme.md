@@ -8,7 +8,7 @@ please start here: \
 [Instruction to do this](https://github.com/nic0michael/Apache2-in-K3S/tree/master/original-working-project)
 
 ## 2. Adding PV and PVC
-We will now add a Persistent Volume PV and a Persistent Volume Claim PVC \
+We will now add a **Persistent Volume PV and a Persistent Volume Claim PVC** \
 This is required to have a permanent storage of the Web Server Content
 [Instruction to do this](https://github.com/nic0michael/Apache2-in-K3S/tree/master/using-pv-and-pvc)
 
